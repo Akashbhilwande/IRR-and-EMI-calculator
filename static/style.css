@@ -1,0 +1,128 @@
+/* Base Styling */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #1b5393;
+  margin: 0;
+  padding: 0;
+  color: #dbe9f4;
+}
+
+.container {
+  width: 90%;
+  max-width: 1000px;
+  margin: 40px auto;
+  background: #1b5393;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Headings */
+h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #a8dadc;
+}
+
+/* Form Grid */
+form .form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+form label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #f1faee;
+}
+
+input[type="number"],
+select {
+  width: 100%;
+  padding: 10px;
+  background: white;
+  color: #111;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+/* Submit Button */
+input[type="submit"],
+.btn-primary,
+.btn-download {
+  width: 100%;
+  padding: 12px;
+  background-color: #457b9d;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.3s ease;
+  grid-column: span 2;
+}
+
+input[type="submit"]:hover,
+.btn-primary:hover,
+.btn-download:hover {
+  background-color: #1d3557;
+}
+
+/* Result Box */
+.result, .irr-box {
+  background: #e9f7ef;
+  color: #1b4332;
+  padding: 15px;
+  margin: 20px 0;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 18px;
+}
+
+/* Table Section */
+h4 {
+  margin-top: 40px;
+  color: #f1faee;
+  text-align: center;
+}
+
+.table-scroll {
+  overflow-x: auto;
+  margin-top: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 30px;
+  background: #ffffff;
+  color: #111;
+}
+
+table thead {
+  background-color: #007bff;
+  color: white;
+}
+
+table th, table td {
+  text-align: center;
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+table tbody tr:nth-child(even) {
+  background-color: #f1f1f1;
+}
+table tbody tr:hover {
+  background-color: #d1e7dd;
+}
+/* Responsive Design */

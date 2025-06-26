@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Loan & Lease EMI Calculator</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .form-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .form-group {
+      flex: 1 1 45%;
+      display: flex;
+      flex-direction: column;
+    }
+    @media (max-width: 600px) {
+      .form-group {
+        flex: 1 1 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Loan & Lease EMI Calculator</h2>
+    <form method="post">
+      <div class="form-grid">
+        <!-- Asset Cost -->
+        <div class="form-group">
+          <label for="asset_cost">Asset Cost (₹):</label>
+          <input id="asset_cost" type="number" name="asset_cost" step="0.01" required value="{{ inputs.asset_cost }}">
+        </div>
+
+        <!-- Supplier Discount -->
+        <div class="form-group">
+          <label for="supplier_discount_pct">Supplier Discount (%):</label>
+          <input id="supplier_discount_pct" type="number" name="supplier_discount_pct" step="0.01" value="{{ inputs.supplier_discount_pct }}">
+        </div>
+
+        <!-- Security Deposit -->
+        <div class="form-group">
+          <label for="security_deposit_pct">Security Deposit (%):</label>
+          <input id="security_deposit_pct" type="number" name="security_deposit_pct" step="0.01" value="{{ inputs.security_deposit_pct }}">
+        </div>
+
+        <!-- Upfront Fees -->
+        <div class="form-group">
+          <label for="upfront_fee_pct">Upfront Fees (%):</label>
+          <input id="upfront_fee_pct" type="number" name="upfront_fee_pct" step="0.01" value="{{ inputs.upfront_fee_pct }}">
+        </div>
+
+        <!-- GST Rate -->
+        <div class="form-group">
+          <label for="gst_pct">GST Rate (%):</label>
+          <input id="gst_pct" type="number" name="gst_pct" step="0.01" value="{{ inputs.gst_pct }}">
+        </div>
+
+        <!-- Interest Rate -->
+        <div class="form-group">
+          <label for="interest_rate">Interest Rate (% p.a.):</label>
+          <input id="interest_rate" type="number" name="interest_rate" step="0.01" required value="{{ inputs.interest_rate }}">
+        </div>
+
+        <!-- Tenure -->
+        <div class="form-group">
+          <label for="tenure_months">Tenure (months):</label>
+          <input id="tenure_months" type="number" name="tenure_months" required value="{{ inputs.tenure_months }}">
+        </div>
+
+        <!-- Moratorium -->
+        <div class="form-group">
+          <label for="moratorium">Moratorium (months):</label>
+          <input id="moratorium" type="number" name="moratorium" value="{{ inputs.moratorium }}">
+        </div>
+
+        <!-- Advance Rentals -->
+        <div class="form-group">
+          <label for="advance_rentals">Advance Rentals (EMIs):</label>
+          <input id="advance_rentals" type="number" name="advance_rentals" value="{{ inputs.advance_rentals }}">
+        </div>
+
+        <!-- Residual Value -->
+        <div class="form-group">
+          <label for="residual_pct">Residual Value (%):</label>
+          <input id="residual_pct" type="number" name="residual_pct" step="0.01" value="{{ inputs.residual_pct }}">
+        </div>
+
+        <!-- Payment Frequency -->
+        <div class="form-group">
+          <label for="payment_frequency">Payment Frequency:</label>
+          <select id="payment_frequency" name="payment_frequency">
+            <option value="monthly" {% if inputs.payment_frequency == 'monthly' %}selected{% endif %}>Monthly</option>
+            <option value="quarterly" {% if inputs.payment_frequency == 'quarterly' %}selected{% endif %}>Quarterly</option>
+          </select>
+        </div>
+
+        <!-- Loan or Lease Toggle -->
+        <div class="form-group">
+          <label for="loan_or_lease">Loan or Lease:</label>
+          <select id="loan_or_lease" name="loan_or_lease" required>
+            <option value="loan" {% if inputs.loan_or_lease == 'loan' %}selected{% endif %}>Loan</option>
+            <option value="lease" {% if inputs.loan_or_lease == 'lease' %}selected{% endif %}>Lease</option>
+          </select>
+        </div>
+
+        <!-- Loan Repayment Type -->
+        <div class="form-group">
+          <label for="loan_type">Repayment Type:</label>
+          <select id="loan_type" name="loan_type" {% if inputs.loan_or_lease == 'lease' %}disabled{% endif %}>
+            <option value="standard" {% if inputs.loan_type == 'standard' %}selected{% endif %}>Standard EMI</option>
+            <option value="bullet" {% if inputs.loan_type == 'bullet' %}selected{% endif %}>Bullet Payment</option>
+            <option value="equal_principal" {% if inputs.loan_type == 'equal_principal' %}selected{% endif %}>Equal Principal</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary">Calculate</button>
+    </form>
+
+    {% if result %}
+      <div class="result">{{ result }}</div>
+    {% endif %}
+
+    {% if irr_monthly is not none %}
+      <div class="irr-box">
+        <p>
+          <strong>Periodic IRR:</strong> {{ irr_monthly }}%<br>
+          <strong>Annualized IRR:</strong> {{ irr_annual }}%
+        </p>
+      </div>
+    {% endif %}
+
+    {% if table %}
+      <h4>Amortization Schedule</h4>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Period</th>
+              <th>Payment</th>
+              <th>Principal</th>
+              <th>Interest</th>
+              <th>Balance</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in table %}
+              <tr>
+                <td>{{ row.Period }}</td>
+                <td>{{ row.Payment }}</td>
+                <td>{{ row.Principal }}</td>
+                <td>{{ row.Interest }}</td>
+                <td>{{ row.Balance }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+  </div>
+
+  <script>
+    document.getElementById('loan_or_lease').addEventListener('change', function() {
+      document.getElementById('loan_type').disabled = this.value === 'lease';
+    });
+  </script>
+</body>
+</html>

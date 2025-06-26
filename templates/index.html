@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Loan & Lease EMI Calculator</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .form-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .form-group {
+      flex: 1 1 45%;
+      display: flex;
+      flex-direction: column;
+    }
+    @media (max-width: 600px) {
+      .form-group {
+        flex: 1 1 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Loan & Lease EMI Calculator</h2>
+    <form method="post">
+      <div class="form-grid">
+        <!-- Principal Amount -->
+        <div class="form-group">
+          <label for="loan_amount">Loan/Asset Amount (₹):</label>
+          <input
+            id="loan_amount"
+            type="number"
+            name="loan_amount"
+            step="0.01"
+            required
+            value="{{ inputs.amount }}"
+          >
+        </div>
+
+        <!-- GST Rate -->
+        <div class="form-group">
+          <label for="gst_rate">GST Rate (%):</label>
+          <input
+            id="gst_rate"
+            type="number"
+            name="gst_rate"
+            step="0.01"
+            placeholder="e.g. 18"
+            value="{{ inputs.gst_rate }}"
+          >
+        </div>
+
+        <!-- Interest Rate -->
+        <div class="form-group">
+          <label for="interest_rate">Interest Rate (% p.a.):</label>
+          <input
+            id="interest_rate"
+            type="number"
+            name="interest_rate"
+            step="0.01"
+            required
+            value="{{ inputs.rate }}"
+          >
+        </div>
+
+        <!-- Tenure -->
+        <div class="form-group">
+          <label for="loan_tenure">Tenure (months):</label>
+          <input
+            id="loan_tenure"
+            type="number"
+            name="loan_tenure"
+            required
+            value="{{ inputs.tenure }}"
+          >
+        </div>
+
+        <!-- Loan or Lease Toggle -->
+        <div class="form-group">
+          <label for="loan_or_lease">Loan or Lease:</label>
+          <select id="loan_or_lease" name="loan_or_lease" required>
+            <option value="loan" {% if inputs.loan_or_lease=='loan' %}selected{% endif %}>Loan</option>
+            <option value="lease" {% if inputs.loan_or_lease=='lease' %}selected{% endif %}>Lease</option>
+          </select>
+        </div>
+
+        <!-- Loan Repayment Type -->
+        <div class="form-group">
+          <label for="loan_type">Repayment Type:</label>
+          <select
+            id="loan_type"
+            name="loan_type"
+            {% if inputs.loan_or_lease=='lease' %}disabled{% endif %}
+          >
+            <option value="standard" {% if inputs.loan_type=='standard' %}selected{% endif %}>Standard EMI</option>
+            <option value="bullet" {% if inputs.loan_type=='bullet' %}selected{% endif %}>Bullet Payment</option>
+            <option value="equal_principal" {% if inputs.loan_type=='equal_principal' %}selected{% endif %}>Equal Principal</option>
+          </select>
+        </div>
+
+        <!-- Residual / Balloon Value -->
+        <div class="form-group">
+          <label for="residual_value">Residual/Balloon Value (₹):</label>
+          <input
+            id="residual_value"
+            type="number"
+            name="residual_value"
+            step="0.01"
+            placeholder="Optional"
+            value="{{ inputs.residual_value }}"
+          >
+        </div>
+
+        <!-- Payment Frequency -->
+        <div class="form-group">
+          <label for="payment_frequency">Payment Frequency:</label>
+          <select id="payment_frequency" name="payment_frequency">
+            <option value="monthly" {% if inputs.payment_frequency=='monthly' %}selected{% endif %}>Monthly</option>
+            <option value="quarterly" {% if inputs.payment_frequency=='quarterly' %}selected{% endif %}>Quarterly</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary">Calculate</button>
+    </form>
+
+    {% if result %}
+      <div class="result">{{ result }}</div>
+    {% endif %}
+
+    {% if irr_monthly is not none %}
+      <div class="irr-box">
+        <p>
+          <strong>Monthly IRR:</strong> {{ irr_monthly }}%<br>
+          <strong>Annualized IRR:</strong> {{ irr_annual }}%
+        </p>
+      </div>
+    {% endif %}
+
+    {% if table %}
+      <h4>Amortization Table</h4>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Payment</th>
+              <th>Principal</th>
+              <th>Interest</th>
+              <th>Balance</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in table %}
+              <tr>
+                <td>{{ row.Month }}</td>
+                <td>{{ row.Payment }}</td>
+                <td>{{ row.Principal }}</td>
+                <td>{{ row.Interest }}</td>
+                <td>{{ row.Balance }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+  </div>
+
+  <script>
+    // Toggle loan type dropdown based on Loan vs Lease
+    document.getElementById('loan_or_lease').addEventListener('change', function() {
+      document.getElementById('loan_type').disabled = this.value === 'lease';
+    });
+  </script>
+</body>
+</html>
